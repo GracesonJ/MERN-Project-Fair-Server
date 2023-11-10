@@ -1,5 +1,9 @@
 // import user Model
 const users = require('../Models/userSchema');
+// import jwt for token generation
+const jwt = require('jsonwebtoken')
+
+
 // register
 exports.register= async(req,res)=>{
     // status code
@@ -33,9 +37,15 @@ exports.login = async (req,res)=>{
     const {email, password} = req.body;
     try{
         // check user exist
-        const existingUser = await users.find({email,password})
+        const existingUser = await users.findOne({email,password})
         if(existingUser){
-            res.status(200).json({existingUser})
+            // generate and send token
+            const token = jwt.sign({userId:existingUser._id},"superSecretKey123")
+            res.status(200).json({
+                existingUser,
+                role:"user",
+                token
+            })
         }else{
             res.status(404).json("Incorrect email / Password")
         }
